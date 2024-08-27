@@ -1,0 +1,65 @@
+{% import '@lib/di.twig' as di %}
+<?php
+
+namespace Drupal\{{ machine_name }}\Plugin\NeoExtraField\Display;
+
+{% sort %}
+  {% if services %}
+{{ di.use(services) }}
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+  {% endif %}
+use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\neo_extra_field\Plugin\NeoExtraFieldDisplayBase;
+{% endsort %}
+
+/**
+ * Extra field plugin {{ plugin_label }}.
+ *
+ * @NeoExtraFieldDisplay(
+ *   id = "{{ plugin_id }}",
+ *   label = @Translation("{{ plugin_label }}"),
+ *   bundles = {
+ *     "node.*",
+ *   },
+ *   visible = false,
+ *   weight = 0
+ * )
+ */
+class {{ class }} extends NeoExtraFieldDisplayBase{% if services %} implements ContainerFactoryPluginInterface{% endif %} {
+
+{% if services %}
+  /**
+   * Constructs the plugin instance.
+   */
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+{{ di.signature(services) }}
+  ) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): self {
+    return new self(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+{{ di.container(services) }}
+    );
+  }
+
+{% endif %}
+  /**
+   * {@inheritdoc}
+   */
+  public function view(ContentEntityInterface $entity) {
+    $build = ['#markup' => 'Hello world!'];
+    return $build;
+  }
+
+}

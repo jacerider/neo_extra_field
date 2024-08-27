@@ -1,0 +1,90 @@
+{% import '@lib/di.twig' as di %}
+<?php
+
+namespace Drupal\{{ machine_name }}\Plugin\NeoExtraField\Form;
+
+{% sort %}
+  {% if services %}
+{{ di.use(services) }}
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+  {% endif %}
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\neo_extra_field\Plugin\NeoExtraFieldFormBase;
+{% endsort %}
+
+/**
+ * Extra field plugin {{ plugin_label }}.
+ *
+ * @NeoExtraFieldForm(
+ *   id = "{{ plugin_id }}",
+ *   label = @Translation("{{ plugin_label }}"),
+ *   bundles = {
+ *     "node.*",
+ *   },
+ *   visible = false,
+ *   weight = 0
+ * )
+ */
+class {{ class }} extends NeoExtraFieldFormBase{% if services %} implements ContainerFactoryPluginInterface{% endif %} {
+
+  use StringTranslationTrait;
+
+{% if services %}
+  /**
+   * Constructs the plugin instance.
+   */
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+{{ di.signature(services) }}
+  ) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): self {
+    return new self(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+{{ di.container(services) }}
+    );
+  }
+
+{% endif %}
+  /**
+   * {@inheritdoc}
+   */
+  public function formElement(array &$complete_form, FormStateInterface $form_state) {
+    $element = [];
+    $element['example_field'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Example field'),
+      '#required' => TRUE,
+      '#size' => 30,
+    ];
+    $element['#validate'][] = [$this, 'customValidate'];
+    return $element;
+  }
+
+  /**
+   * Custom field validation.
+   *
+   * @param array $form
+   *   The form element.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   */
+  public function customValidate(array $form, FormStateInterface $form_state) {
+    $value = $form_state->getValue('example_field');
+    if ($value === 'Error') {
+      $form_state->setErrorByName('example_field', $this->t('Hello Example'));
+    }
+  }
+
+}
