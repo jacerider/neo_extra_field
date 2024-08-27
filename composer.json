@@ -1,6 +1,6 @@
 {
   "name": "jacerider/neo_extra_field",
-  "description": "Provides loading throbbers.",
+  "description": "Provides a plugin type for extra fields that look like real fields, but do not store data.",
   "type": "drupal-module",
   "license": "proprietary",
   "homepage": "https://github.com/jacerider/neo_extra_field",
